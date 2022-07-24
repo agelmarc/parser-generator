@@ -1,0 +1,29 @@
+$ROOT = VALUE;
+$WHITESPACE = { ' ' | '\n' | '\r' | '\t' };
+
+VALUE = STRING | NUMBER | OBJECT | ARRAY | TRUE | FALSE | NULL;
+
+// Literal values
+TRUE = 't' 'r' 'u' 'e';
+FALSE = 'f' 'a' 'l' 's' 'e';
+NULL = 'n' 'u' 'l' 'l';
+
+// Numbers
+NUMBER = [ '-' ] ( '0' | NUMBER_NONZERO ) [ NUMBER_F ] [ NUMBER_E ];
+NUMBER_NONZERO = DIGIT_NONZERO { DIGIT };
+NUMBER_F = '.' { DIGIT };
+NUMBER_E = ( 'E' | 'e' ) [ '-' | '+' ] { DIGIT };
+DIGIT = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+DIGIT_NONZERO = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+
+// Strings
+STRING = '"' { CODEPOINT | ESCAPED } '"';
+ESCAPED = '\' ('"' | '\' | '/' | 'b' | 'f' | 'n' | 'r' | 't' | ('u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT));
+HEX_DIGIT = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
+
+// Arrays
+ARRAY = '['  ']' | '[' VALUE { ',' VALUE } ']';
+
+// Objects
+OBJECT = '{' '}' | '{' PROPERTY { ',' PROPERTY } '}';
+PROPERTY = STRING ':' VALUE
