@@ -1,3 +1,4 @@
 /target
 /Cargo.lock
 large-file.json
+*.bnf
