@@ -1,5 +1,4 @@
 use std::fmt::Debug;
-use std::ops::Index;
 
 use crate::bnf::bnf_parser;
 use crate::build::ParserBuilder;
@@ -68,7 +67,7 @@ impl Default for SymbolProperties {
 #[derive(Debug)]
 pub struct Node {
     pub node_type: String,
-    loc: Range,
+    pub loc: Range,
     pub data: NodeData,
 }
 
@@ -112,7 +111,7 @@ fn join_and_wrap(strings: Vec<String>, sep: &str) -> String {
 impl Symbol {
     pub fn repr(&self, p: &Parser) -> String {
         match &self.symbol_type {
-            SymbolType::AnyExcept(c) => "ANY".to_owned(),
+            SymbolType::AnyExcept(_) => "ANY".to_owned(),
             SymbolType::Sequence(s) => {
                 let reprs = s
                     .iter()
@@ -327,7 +326,7 @@ impl Symbol {
     fn try_advance_terminal(
         c: &char,
         stream: &mut CharStream,
-        p: &Parser,
+        _p: &Parser,
     ) -> DataResult {
         if let Some(next_char) = stream.peek() {
             if c == next_char {
@@ -344,7 +343,7 @@ impl Symbol {
     fn try_advance_any_except(
         chars: &[char],
         stream: &mut CharStream,
-        p: &Parser,
+        _p: &Parser,
     ) -> DataResult {
         if let Some(next_char) = stream.peek() {
             if !chars.contains(next_char) {
@@ -411,7 +410,7 @@ impl Parser {
             .get_symbol(&self.root_node.expect("No root node defined"))
             .try_advance(stream, &self)
         {
-            AdvanceResult::Ok(n) => {
+            AdvanceResult::Ok(_) => {
                 panic!("Root node is set to be ignored");
             }
             AdvanceResult::Err => ParseResult::Err(stream.get_pos()),

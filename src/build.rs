@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use crate::parse::Node;
 use crate::parse::NodeData;
 use crate::parse::Parser;
-use crate::parse::Symbol;
 use crate::parse::SymbolIdent;
 use crate::parse::SymbolProperties;
 
@@ -93,12 +92,12 @@ impl<'a> ParserBuilder<'a> {
             "MANY" => self.build_many(node, name, raw, ignore),
             "ANY" => self.build_any(node, name, raw, ignore),
             "WHITESPACE_ID" => {
-                let WHITESPACE_CHAR = self.parser.one_of_chars(
+                let possible_chars = self.parser.one_of_chars(
                     " \n\r\t",
                     SymbolProperties::new("WHITESPACE_CHAR", false, true),
                 );
                 self.parser.zero_or_more(
-                    &WHITESPACE_CHAR,
+                    &possible_chars,
                     SymbolProperties::new("WHITESPACE", false, true),
                 )
             }
