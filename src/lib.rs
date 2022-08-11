@@ -1,4 +1,4 @@
-#![feature(try_trait_v2)]
+pub mod arith;
 pub mod bnf;
 pub mod build;
 pub mod input;
