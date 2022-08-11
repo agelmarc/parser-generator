@@ -1,6 +1,7 @@
 use crate::parse::Parser;
 
 const JSON_BNF: &str = r#"
+
 ROOT(root) = [ VALUE ];
 VALUE(ignore) = $WHITESPACE (STRING | NUMBER | OBJECT | ARRAY | TRUE | FALSE | NULL) $WHITESPACE;
 
