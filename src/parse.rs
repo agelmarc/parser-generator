@@ -366,6 +366,12 @@ pub struct Parser {
 #[derive(Copy, Clone, Debug)]
 pub struct SymbolIdent(pub usize);
 
+impl Default for Parser {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Parser {
     pub fn new() -> Self {
         Parser {
@@ -579,9 +585,8 @@ impl Parser {
         } else {
             Default::default()
         };
-        let symbol_type = SymbolType::OneOf(
-            chars.map(|c| self.terminal(c, None)).collect(),
-        );
+        let symbol_type =
+            SymbolType::OneOf(chars.map(|c| self.terminal(c, None)).collect());
         self.insert_symbol(Symbol {
             symbol_type,
             properties,

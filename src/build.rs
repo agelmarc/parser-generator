@@ -22,6 +22,12 @@ enum StmtInfo<'a> {
     AlreadyBuild(SymbolIdent),
 }
 
+impl<'a> Default for ParserBuilder<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> ParserBuilder<'a> {
     pub fn new() -> Self {
         ParserBuilder {
@@ -106,10 +112,10 @@ impl<'a> ParserBuilder<'a> {
     }
 
     fn build_identifier(&mut self, identifier: &str) -> SymbolIdent {
-        let stmt_info = self
-            .stmt_registry
-            .get(identifier)
-            .unwrap_or_else(|| panic!("Usage of undeclared identifier {}", identifier));
+        let stmt_info =
+            self.stmt_registry.get(identifier).unwrap_or_else(|| {
+                panic!("Usage of undeclared identifier {}", identifier)
+            });
         match *stmt_info {
             StmtInfo::NotBuiltYet { node, raw, ignore } => {
                 self.build_statement(node, raw, ignore)
@@ -282,10 +288,7 @@ fn get_stmt_info(node: &Node) -> Vec<&str> {
     };
     assert_eq!(info_node.node_type, "STMT_INFO");
     let children = get_children_of_node(info_node);
-    children
-        .iter()
-        .map(get_raw_value_of_node)
-        .collect()
+    children.iter().map(get_raw_value_of_node).collect()
 }
 
 fn get_stmt_expr(node: &Node) -> &Node {
