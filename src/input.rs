@@ -94,7 +94,7 @@ impl CharStream {
                 self.col = 1;
             }
         }
-        return char;
+        char
     }
     pub fn peek(&self) -> Option<&char> {
         self.chars.get(self.index)

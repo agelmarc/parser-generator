@@ -37,7 +37,7 @@ impl<'a> ParserBuilder<'a> {
         ignore: bool,
     ) -> SymbolIdent {
         assert_eq!(node.node_type, "STATEMENT");
-        let identifier = get_stmt_identifier(&node);
+        let identifier = get_stmt_identifier(node);
         self.build_expr(get_stmt_expr(node), Some(identifier), raw, ignore)
     }
 
@@ -67,7 +67,7 @@ impl<'a> ParserBuilder<'a> {
         match root_node {
             Some(root_node) => {
                 if let StmtInfo::NotBuiltYet { node, raw, ignore } = root_node {
-                    let root_ident = self.build_statement(&node, raw, ignore);
+                    let root_ident = self.build_statement(node, raw, ignore);
                     self.parser.root_node(&root_ident);
                 }
             }
@@ -109,7 +109,7 @@ impl<'a> ParserBuilder<'a> {
         let stmt_info = self
             .stmt_registry
             .get(identifier)
-            .expect(&format!("Usage of undeclared identifier {}", identifier));
+            .unwrap_or_else(|| panic!("Usage of undeclared identifier {}", identifier));
         match *stmt_info {
             StmtInfo::NotBuiltYet { node, raw, ignore } => {
                 self.build_statement(node, raw, ignore)
@@ -250,17 +250,17 @@ impl<'a> ParserBuilder<'a> {
 }
 
 pub fn get_children_of_node(node: &Node) -> &[Node] {
-    return match &node.data {
+    match &node.data {
         NodeData::Children(c) => c,
         NodeData::Raw(_) => panic!("is a raw node"),
-    };
+    }
 }
 
 pub fn get_raw_value_of_node(node: &Node) -> &str {
-    return match &node.data {
+    match &node.data {
         NodeData::Children(_) => panic!("is not a raw node"),
         NodeData::Raw(s) => s,
-    };
+    }
 }
 
 fn get_stmt_identifier(node: &Node) -> &str {
@@ -281,10 +281,10 @@ fn get_stmt_info(node: &Node) -> Vec<&str> {
         NodeData::Raw(_) => panic!("Statement node is raw"),
     };
     assert_eq!(info_node.node_type, "STMT_INFO");
-    let children = get_children_of_node(&info_node);
+    let children = get_children_of_node(info_node);
     children
-        .into_iter()
-        .map(|child| get_raw_value_of_node(child))
+        .iter()
+        .map(get_raw_value_of_node)
         .collect()
 }
 

@@ -226,5 +226,5 @@ pub fn bnf_parser() -> Parser {
         crate::parse::SymbolType::AnyExcept(_) => todo!(),
     }
     parser.root_node(&ROOT);
-    return parser;
+    parser
 }

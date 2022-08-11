@@ -26,8 +26,8 @@ pub struct Symbol {
 impl Symbol {
     pub fn add_ident(&mut self, ident: &SymbolIdent) {
         match &mut self.symbol_type {
-            SymbolType::Sequence(s) => s.push(ident.clone()),
-            SymbolType::OneOf(s) => s.push(ident.clone()),
+            SymbolType::Sequence(s) => s.push(*ident),
+            SymbolType::OneOf(s) => s.push(*ident),
             SymbolType::Optional(_) => panic!(),
             SymbolType::OneOrMore(_) => panic!(),
             SymbolType::ZeroOrMore(_) => panic!(),
@@ -165,7 +165,7 @@ impl Symbol {
 
 impl Symbol {
     fn name(&self) -> String {
-        return if let Some(name) = &self.properties.node_name {
+        if let Some(name) = &self.properties.node_name {
             name.to_owned()
         } else {
             match self.symbol_type {
@@ -177,7 +177,7 @@ impl Symbol {
                 SymbolType::Terminal(_) => "Terminal".to_owned(),
                 SymbolType::AnyExcept(_) => "AnyExcept".to_owned(),
             }
-        };
+        }
     }
 
     fn try_advance(
@@ -204,7 +204,7 @@ impl Symbol {
                 Symbol::try_advance_terminal(c, stream, p)
             }
             SymbolType::AnyExcept(c) => {
-                Symbol::try_advance_any_except(&c, stream, p)
+                Symbol::try_advance_any_except(c, stream, p)
             }
         };
         return match data_result {
@@ -216,7 +216,7 @@ impl Symbol {
                 } else {
                     let (raw, range) = stream.since_pos(start_pos);
                     let data = if self.properties.raw {
-                        NodeData::Raw(raw.into_iter().collect())
+                        NodeData::Raw(raw.iter().collect())
                     } else {
                         NodeData::Children(node)
                     };
@@ -240,13 +240,13 @@ impl Symbol {
         loop {
             match p.get_symbol(symbol).try_advance(stream, p) {
                 AdvanceResult::NewNode(node) => {
-                    if once == false {
+                    if !once {
                         once = true;
                     }
                     data.push(node)
                 }
                 AdvanceResult::Ok(mut nodes) => {
-                    if once == false {
+                    if !once {
                         once = true
                     };
                     data.append(&mut nodes)
@@ -331,7 +331,7 @@ impl Symbol {
         if let Some(next_char) = stream.peek() {
             if c == next_char {
                 stream.next();
-                return DataResult::Data(vec![]);
+                DataResult::Data(vec![])
             } else {
                 DataResult::Err
             }
@@ -348,7 +348,7 @@ impl Symbol {
         if let Some(next_char) = stream.peek() {
             if !chars.contains(next_char) {
                 stream.next();
-                return DataResult::Data(vec![]);
+                DataResult::Data(vec![])
             } else {
                 DataResult::Err
             }
@@ -408,7 +408,7 @@ impl Parser {
     pub fn parse(&self, stream: &mut CharStream) -> ParseResult {
         match self
             .get_symbol(&self.root_node.expect("No root node defined"))
-            .try_advance(stream, &self)
+            .try_advance(stream, self)
         {
             AdvanceResult::Ok(_) => {
                 panic!("Root node is set to be ignored");
@@ -470,7 +470,7 @@ impl Parser {
         };
         self.insert_symbol(Symbol {
             symbol_type: SymbolType::OneOf(
-                symbols.into_iter().map(|s| s.clone()).collect(),
+                symbols.into_iter().copied().collect(),
             ),
             properties,
         })
@@ -497,7 +497,7 @@ impl Parser {
         };
         self.insert_symbol(Symbol {
             symbol_type: SymbolType::Sequence(
-                symbols.into_iter().map(|s| s.clone()).collect(),
+                symbols.into_iter().copied().collect(),
             ),
             properties,
         })
@@ -513,7 +513,7 @@ impl Parser {
             Default::default()
         };
         self.insert_symbol(Symbol {
-            symbol_type: SymbolType::Optional(symbol.clone()),
+            symbol_type: SymbolType::Optional(*symbol),
             properties,
         })
     }
@@ -529,7 +529,7 @@ impl Parser {
         };
 
         self.insert_symbol(Symbol {
-            symbol_type: SymbolType::OneOrMore(symbol.clone()),
+            symbol_type: SymbolType::OneOrMore(*symbol),
             properties,
         })
     }
@@ -545,7 +545,7 @@ impl Parser {
         };
 
         self.insert_symbol(Symbol {
-            symbol_type: SymbolType::ZeroOrMore(symbol.clone()),
+            symbol_type: SymbolType::ZeroOrMore(*symbol),
             properties,
         })
     }
@@ -561,7 +561,7 @@ impl Parser {
         };
         let chars = string.chars();
         let symbol_type = SymbolType::Sequence(
-            chars.map(|c| self.terminal(c.clone(), None)).collect(),
+            chars.map(|c| self.terminal(c, None)).collect(),
         );
         self.insert_symbol(Symbol {
             symbol_type,
@@ -580,7 +580,7 @@ impl Parser {
             Default::default()
         };
         let symbol_type = SymbolType::OneOf(
-            chars.map(|c| self.terminal(c.clone(), None)).collect(),
+            chars.map(|c| self.terminal(c, None)).collect(),
         );
         self.insert_symbol(Symbol {
             symbol_type,
@@ -680,8 +680,8 @@ mod tests {
             parser.optional(&minus, SymbolProperties::new("", false, false));
         parser.root_node(&symbol);
 
-        let mut stream1 = CharStream::from("-");
-        let mut stream2 = CharStream::from("");
+        let _stream1 = CharStream::from("-");
+        let _stream2 = CharStream::from("");
         let mut stream3 = CharStream::from("a");
 
         // assert!(matches!(parser.parse(&mut stream1), ParseResult::Ok(_)));
