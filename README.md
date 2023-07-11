@@ -38,7 +38,7 @@ The Parser can be used by
 
 ```rs
 
-let json_parser = json_parser();
+let json_parser = Parser::from_bnf(JSON_BNF);
 let input_str = "{\"key\":3}";
 let result = json_parser.parse(&mut CharStream::from(input_str));
 println!("{:#?}", result);
